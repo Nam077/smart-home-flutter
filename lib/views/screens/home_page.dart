@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:smarthome/models/device.dart';
 import 'package:smarthome/services/device_service.dart';
 import 'package:smarthome/services/room_service.dart';
+import 'package:smarthome/views/widgets/modal_sptt.dart';
 
 import '../../models/room.dart';
 import '../widgets/header.dart';
@@ -33,6 +34,15 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _showModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return const ModalSpeechToText(); // Your StatefulWidget inside the modal
+      },
+    );
+  }
+
   void _fetchRooms() {
     futureRooms = RoomService.getRooms();
     futureRooms.then((rooms) {
@@ -50,7 +60,15 @@ class _HomePageState extends State<HomePage> {
     _fetchRooms();
   }
 
-  void onToggle(int index, bool status) {}
+  Future<bool> onToggleAPI(int id, bool status) async {
+    bool result = await DeviceService.updateDeviceStatus(id);
+    return result;
+  }
+
+  Future<bool> onToggle(int id, bool status) async {
+    bool result = await onToggleAPI(id, status);
+    return result;
+  }
 
   void _onTabSelected(int id) {
     if (id != _selectedRoomId) {
@@ -64,45 +82,51 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F7FF),
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () async {
-            _onRefresh();
-          },
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Header(),
-                  FutureBuilder(
-                      future: futureRooms,
-                      builder: (context, snapshot) {
-                        return _buildRoomList(context, snapshot);
-                      }),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Devices',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+        backgroundColor: const Color(0xFFF4F7FF),
+        body: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              _onRefresh();
+            },
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Header(),
+                    FutureBuilder(
+                        future: futureRooms,
+                        builder: (context, snapshot) {
+                          return _buildRoomList(context, snapshot);
+                        }),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Devices',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  FutureBuilder(
-                      future: futureDevices,
-                      builder: (context, snapshot) {
-                        return _buildDeviceList(context, snapshot);
-                      }),
-                ],
+                    const SizedBox(height: 16),
+                    FutureBuilder(
+                        future: futureDevices,
+                        builder: (context, snapshot) {
+                          return _buildDeviceList(context, snapshot);
+                        }),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
+        floatingActionButton: FloatingActionButton(
+          // icon micro
+          child: const Icon(Icons.mic),
+          onPressed: () {
+            _showModal(context);
+          },
+        ));
   }
 
   Widget _buildRoomList(
@@ -133,6 +157,6 @@ class _HomePageState extends State<HomePage> {
     if (!snapshot.hasData || snapshot.data!.isEmpty) {
       return const Text('No devices available');
     }
-    return ListDeviceCard(devices: snapshot.data!);
+    return ListDeviceCard(devices: snapshot.data!, onToggle: onToggle);
   }
 }

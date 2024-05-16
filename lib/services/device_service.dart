@@ -22,7 +22,7 @@ class DeviceService {
     }
   }
 
-  static Future<void> updateDeviceStatus(int id) async {
+  static Future<bool> updateDeviceStatus(int id) async {
     final header = {
       'Content-Type': 'application/json',
       'Accept': '*/*',
@@ -33,6 +33,25 @@ class DeviceService {
     );
     if (response.statusCode != 200) {
       throw Exception('Failed to update device status');
+    }
+    return response.statusCode == 200;
+  }
+
+  static Future<String> textHandler(String text) async {
+    final header = {
+      'Content-Type': 'application/json',
+      'Accept': '*/*',
+    };
+    final response = await http.patch(
+      Uri.parse('${dotenv.env['API_SERVER']}/device/text'),
+      headers: header,
+      body: convert.jsonEncode({'text': text}),
+    );
+    if (response.statusCode == 200) {
+      final result = convert.jsonDecode(response.body);
+      return result['message'];
+    } else {
+      throw Exception('Failed to handle text');
     }
   }
 }

@@ -4,7 +4,8 @@ import '../../models/device.dart';
 
 class DeviceCard extends StatefulWidget {
   final Device device;
-  const DeviceCard({super.key, required this.device});
+  final Future<bool> Function(int id, bool status) onToggle;
+  const DeviceCard({super.key, required this.device, required this.onToggle});
 
   @override
   State<DeviceCard> createState() => _DeviceCardState();
@@ -20,8 +21,12 @@ class _DeviceCardState extends State<DeviceCard> {
   }
 
   void _handleSwitchChanged(bool newValue) {
-    setState(() {
-      _deviceStatus = newValue; // Cập nhật trạng thái và xây dựng lại UI
+    widget.onToggle(widget.device.id, newValue).then((value) {
+      if (value) {
+        setState(() {
+          _deviceStatus = newValue;
+        });
+      }
     });
   }
 
