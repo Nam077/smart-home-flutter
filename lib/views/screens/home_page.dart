@@ -28,10 +28,11 @@ class _HomePageState extends State<HomePage> {
     _fetchRooms();
   }
 
-  void _fetchDevices(int id) async {
-    setState(() {
-      futureDevices = DeviceService.getDeviceByIdRomm(id);
-    });
+  void showToastError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.red,
+    ));
   }
 
   void _showModal(BuildContext context) {
@@ -43,40 +44,79 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _fetchDevices(int id) async {
+    try {
+      setState(() {
+        futureDevices = DeviceService.getDeviceByIdRomm(id);
+      });
+    } catch (e) {
+      showToastError('Có lỗi xảy ra khi lấy dữ liệu thiết bị');
+    }
+  }
+
   void _fetchRooms() {
-    futureRooms = RoomService.getRooms();
-    futureRooms.then((rooms) {
-      if (rooms.isNotEmpty) {
-        if (_selectedRoomId == -1) {
-          _selectedRoomId = rooms.first.id;
+    try {
+      futureRooms = RoomService.getRooms();
+      futureRooms.then((rooms) {
+        if (rooms.isNotEmpty) {
+          if (_selectedRoomId == -1) {
+            _selectedRoomId = rooms.first.id;
+          }
+          _fetchDevices(_selectedRoomId);
         }
-        _fetchDevices(_selectedRoomId);
-      }
-    }).catchError((error) {});
-    setState(() {});
+      }).catchError((error) {
+        // Handle the error, e.g., show a message to the user
+        showToastError('Có lỗi xảy ra khi lấy dữ liệu phòng');
+      });
+      setState(() {});
+    } catch (e) {
+      // Handle the error, e.g., show a message to the user
+      showToastError('Có lỗi xảy ra khi lấy dữ liệu phòng');
+    }
   }
 
   void _onRefresh() {
-    _fetchRooms();
+    try {
+      _fetchRooms();
+    } catch (e) {
+      // Handle the error, e.g., show a message to the user
+      showToastError('Có lỗi xảy ra khi làm mới dữ liệu');
+    }
   }
 
   Future<bool> onToggleAPI(int id, bool status) async {
-    bool result = await DeviceService.updateDeviceStatus(id);
-    return result;
+    try {
+      bool result = await DeviceService.updateDeviceStatus(id);
+      return result;
+    } catch (e) {
+      showToastError('Có lỗi xảy ra khi cập nhật trạng thái thiết bị');
+      return false;
+    }
   }
 
   Future<bool> onToggle(int id, bool status) async {
-    bool result = await onToggleAPI(id, status);
-    return result;
+    try {
+      bool result = await onToggleAPI(id, status);
+      return result;
+    } catch (e) {
+      // Handle the error, e.g., show a message to the user
+      showToastError('Có lỗi xảy ra khi cập nhật trạng thái thiết bị');
+      return false;
+    }
   }
 
   void _onTabSelected(int id) {
-    if (id != _selectedRoomId) {
-      _fetchDevices(id);
+    try {
+      if (id != _selectedRoomId) {
+        _fetchDevices(id);
+      }
+      setState(() {
+        _selectedRoomId = id;
+      });
+    } catch (e) {
+      // Handle the error, e.g., show a message to the user
+      showToastError('Có lỗi xảy ra khi chọn phòng');
     }
-    setState(() {
-      _selectedRoomId = id;
-    });
   }
 
   @override
@@ -134,9 +174,6 @@ class _HomePageState extends State<HomePage> {
     if (snapshot.connectionState == ConnectionState.waiting) {
       return const Center(child: CircularProgressIndicator());
     }
-    if (snapshot.hasError) {
-      return Text('Error: ${snapshot.error}');
-    }
     if (!snapshot.hasData || snapshot.data!.isEmpty) {
       return const Text('No rooms available');
     }
@@ -150,9 +187,6 @@ class _HomePageState extends State<HomePage> {
       BuildContext context, AsyncSnapshot<List<Device>> snapshot) {
     if (snapshot.connectionState == ConnectionState.waiting) {
       return const Center(child: CircularProgressIndicator());
-    }
-    if (snapshot.hasError) {
-      return Text('Error: ${snapshot.error}');
     }
     if (!snapshot.hasData || snapshot.data!.isEmpty) {
       return const Text('No devices available');

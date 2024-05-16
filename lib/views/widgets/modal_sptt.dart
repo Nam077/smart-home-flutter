@@ -74,16 +74,28 @@ class _ModalSpeechToTextState extends State<ModalSpeechToText> {
       speechToText.stop();
     });
 
-    String result = await DeviceService.textHandler(_textResult);
-    Fluttertoast.showToast(
-      msg: result,
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.BOTTOM,
-      timeInSecForIosWeb: 1,
-      backgroundColor: Colors.green,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
+    try {
+      final result = await DeviceService.textHandler(_textResult);
+      Fluttertoast.showToast(
+        msg: result,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.green,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: 'Có lỗi xảy ra khi xử lý văn bản',
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
   }
 
   @override
