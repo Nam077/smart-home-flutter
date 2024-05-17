@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -13,6 +14,7 @@ class ModalSpeechToText extends StatefulWidget {
 }
 
 class _ModalSpeechToTextState extends State<ModalSpeechToText> {
+  final FlutterTts flutterTts = FlutterTts();
   bool switchValue = false;
   final SpeechToText speechToText = SpeechToText();
   String _textResult = '';
@@ -22,17 +24,7 @@ class _ModalSpeechToTextState extends State<ModalSpeechToText> {
     bool available = await speechToText.initialize();
     if (available) {
       setState(() {
-        if (kDebugMode) {
-          Fluttertoast.showToast(
-            msg: 'Microphone is available',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM,
-            timeInSecForIosWeb: 1,
-            backgroundColor: Colors.green,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
-        }
+        if (kDebugMode) {}
       });
     } else {
       if (kDebugMode) {
@@ -47,6 +39,18 @@ class _ModalSpeechToTextState extends State<ModalSpeechToText> {
         );
       }
     }
+  }
+
+  Future<void> _setLanguage() async {
+    await flutterTts.setLanguage("vi-VN");
+  }
+
+  Future<void> _speak(String text) async {
+    await flutterTts.setLanguage("vi-VN");
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setPitch(1.0);
+    await flutterTts.speak(text);
   }
 
   void _onResult(SpeechRecognitionResult result) {
@@ -101,6 +105,7 @@ class _ModalSpeechToTextState extends State<ModalSpeechToText> {
         textColor: Colors.white,
         fontSize: 16.0,
       );
+      _speak(result);
     } catch (e) {
       Fluttertoast.showToast(
         msg: 'Có lỗi xảy ra khi xử lý văn bản ${e.toString()}',
@@ -118,6 +123,7 @@ class _ModalSpeechToTextState extends State<ModalSpeechToText> {
   void initState() {
     super.initState();
     checkMicrophoneAvailability();
+    _setLanguage();
   }
 
   @override
