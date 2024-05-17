@@ -54,4 +54,44 @@ class DeviceService {
       throw Exception('Failed to handle text');
     }
   }
+
+  static Future<String> addDevice(Device device) async {
+    final header = {
+      'Content-Type': 'application/json',
+      'Accept': '*/*',
+    };
+    final response = await http.post(
+      Uri.parse('${dotenv.env['API_SERVER']}/device'),
+      headers: header,
+      body: convert.jsonEncode({
+        'name': device.name,
+        'status': device.isSensor ? false : device.status,
+        'isSensor': device.isSensor,
+        'image': device.image,
+        'pinMode': device.pinMode,
+        'value': device.value,
+        'description': device.description,
+        'roomId': device.roomId,
+        'unitId': device.isSensor ? device.unitId : null,
+      }),
+    );
+    if (response.statusCode == 201) {
+      final Map<String, dynamic> body = convert.jsonDecode(response.body);
+      return "Device ${body['name']} added successfully";
+    } else {
+      final Map<String, dynamic> body = convert.jsonDecode(response.body);
+      if (body.containsKey('message')) {
+        if (body['message'] is List) {
+          throw Exception(body['message']
+              .join('\n')
+              .toString()
+              .replaceFirst('Exception: ', ''));
+        } else {
+          throw Exception(body['message']);
+        }
+      } else {
+        throw Exception('Failed to add device');
+      }
+    }
+  }
 }

@@ -23,12 +23,28 @@ class _ModalSpeechToTextState extends State<ModalSpeechToText> {
     if (available) {
       setState(() {
         if (kDebugMode) {
-          print('Microphone available: $available');
+          Fluttertoast.showToast(
+            msg: 'Microphone is available',
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.green,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
         }
       });
     } else {
       if (kDebugMode) {
-        print("The user has denied the use of speech recognition.");
+        Fluttertoast.showToast(
+          msg: 'Microphone is not available',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
       }
     }
   }
@@ -87,7 +103,7 @@ class _ModalSpeechToTextState extends State<ModalSpeechToText> {
       );
     } catch (e) {
       Fluttertoast.showToast(
-        msg: 'Có lỗi xảy ra khi xử lý văn bản',
+        msg: 'Có lỗi xảy ra khi xử lý văn bản ${e.toString()}',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
@@ -126,19 +142,18 @@ class _ModalSpeechToTextState extends State<ModalSpeechToText> {
               ),
             ),
           ),
-          GestureDetector(
-              onTapDown: (_) => _listening(),
-              onTapUp: (_) => _stopListening(),
-              onTapCancel: () => setState(() => _isListening = false),
-              child: CircleAvatar(
-                radius: 35, // The radius of the circle
-                backgroundColor: Colors.blueAccent,
-                child: Icon(
-                  _isListening ? Icons.mic : Icons.mic_none,
-                  size: 30,
-                  color: _isListening ? Colors.red : Colors.white,
-                ),
-              )),
+          CircleAvatar(
+            radius: 35, // The radius of the circle
+            backgroundColor: Colors.blueAccent,
+            child: IconButton(
+              onPressed: _isListening ? _stopListening : _listening,
+              icon: Icon(
+                _isListening ? Icons.mic : Icons.mic_none,
+                size: 30,
+                color: _isListening ? Colors.red : Colors.white,
+              ),
+            ),
+          ),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () => Navigator.pop(context),

@@ -2,7 +2,7 @@ import 'room.dart';
 import 'unit.dart';
 
 class Device {
-  int id;
+  int? id;
   String name;
   String description;
   bool status;
@@ -12,7 +12,8 @@ class Device {
   Room? room;
   Unit? unit;
   bool isSensor;
-  int? unitId; // Make unitId optional
+  int? unitId;
+  int? roomId;
 
   Device({
     required this.id,
@@ -25,7 +26,8 @@ class Device {
     this.room,
     this.unit,
     required this.isSensor,
-    this.unitId, // Remove required for unitId
+    this.unitId,
+    this.roomId,
   });
 
   factory Device.fromJson(Map<String, dynamic> json) {
@@ -40,7 +42,8 @@ class Device {
       room: json['room'] != null ? Room.fromJson(json['room']) : null,
       unit: json['unit'] != null ? Unit.fromJson(json['unit']) : null,
       isSensor: json['isSensor'],
-      unitId: json['unitId'], // Handle unitId as nullable
+      unitId: json['unitId'],
+      roomId: json['roomId'],
     );
   }
 
@@ -56,7 +59,8 @@ class Device {
       'room': room?.toJson(),
       'unit': unit?.toJson(),
       'isSensor': isSensor,
-      'unitId': unitId, // Handle unitId as nullable
+      'unitId': unitId,
+      'roomId': roomId,
     };
   }
 }

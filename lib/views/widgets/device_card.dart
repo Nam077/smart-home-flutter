@@ -21,7 +21,10 @@ class _DeviceCardState extends State<DeviceCard> {
   }
 
   void _handleSwitchChanged(bool newValue) {
-    widget.onToggle(widget.device.id, newValue).then((value) {
+    if (widget.device.isSensor) {
+      return;
+    }
+    widget.onToggle(widget.device.id!, newValue).then((value) {
       if (value) {
         setState(() {
           _deviceStatus = newValue;
@@ -64,13 +67,34 @@ class _DeviceCardState extends State<DeviceCard> {
                     child: Image.network(widget.device.image,
                         width: 60, height: 60),
                   ),
-                  Transform.scale(
-                      scale: 0.9,
-                      child: Switch(
-                        value: _deviceStatus,
-                        onChanged: _handleSwitchChanged,
-                        activeColor: const Color(0xFFFFFFFF),
-                      )),
+                  widget.device.isSensor
+                      ? Text(
+                          '${widget.device.value} ${widget.device.unit?.abbreviation ?? ''}',
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : Transform.scale(
+                          scale: 0.9,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Colors
+                                    .transparent, // Màu viền trong suốt để loại bỏ viền
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                  20.0), // Bán kính viền để tạo hiệu ứng cong
+                            ),
+                            child: Switch(
+                              value: _deviceStatus,
+                              onChanged: _handleSwitchChanged,
+                              activeColor: const Color(0xFFFFFFFF),
+                              // Màu thumb khi không bật
+                            ),
+                          ),
+                        ),
                 ],
               ),
               const SizedBox(height: 40),

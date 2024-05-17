@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:smarthome/views/screens/add_unit.dart';
 
 // Các màn hình khác nhau
 import 'package:smarthome/views/screens/home_page.dart';
-import 'package:smarthome/views/screens/profile_page.dart';
+import 'package:smarthome/views/screens/add_device.dart';
 
-import 'views/screens/setting_page.dart';
+import 'views/screens/add_room.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");
@@ -46,8 +47,9 @@ class _MainPageState extends State<MainPage> {
   // Danh sách các widget cho mỗi trang
   final List<Widget> _pages = [
     const HomePage(),
-    const ProfilePage(),
-    const SettingPage(),
+    const AddDevice(),
+    const AddRoom(),
+    const AddUnit(),
   ];
 
   void _onItemTapped(int index) {
@@ -69,15 +71,19 @@ class _MainPageState extends State<MainPage> {
         destinations: const <NavigationDestination>[
           NavigationDestination(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: 'Trang chủ',
           ),
           NavigationDestination(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.devices_other),
+            label: 'Thêm thiết bị',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+            icon: Icon(Icons.room_sharp),
+            label: 'Thêm phòng',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.add),
+            label: 'Thêm đơn vị',
           ),
         ],
       ),

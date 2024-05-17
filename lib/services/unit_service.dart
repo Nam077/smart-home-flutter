@@ -3,40 +3,41 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'dart:convert' as convert;
 
 import 'package:http/http.dart' as http;
-import 'package:smarthome/models/room.dart';
+import 'package:smarthome/models/device.dart';
+import 'package:smarthome/models/unit.dart';
 
-class RoomService {
-  static Future<List<Room>> getRooms() async {
+class UnitService {
+  static Future<List<Unit>> getUnits() async {
     final header = {
       'Content-Type': 'application/json',
       'Accept': '*/*',
     };
     final response = await http
-        .get(Uri.parse('${dotenv.env['API_SERVER']}/room'), headers: header);
+        .get(Uri.parse('${dotenv.env['API_SERVER']}/unit'), headers: header);
     if (response.statusCode == 200) {
-      final List<dynamic> rooms = convert.jsonDecode(response.body);
-      return rooms.map((json) => Room.fromJson(json)).toList();
+      final List<dynamic> units = convert.jsonDecode(response.body);
+      return units.map((json) => Unit.fromJson(json)).toList();
     } else {
-      throw Exception('Failed to load rooms');
+      throw Exception('Failed to load units');
     }
   }
 
-  static Future<String> addRoom(String name, String description) async {
+  static Future<String> addUnit(Unit unit) async {
     final header = {
       'Content-Type': 'application/json',
       'Accept': '*/*',
     };
     final response = await http.post(
-      Uri.parse('${dotenv.env['API_SERVER']}/room'),
+      Uri.parse('${dotenv.env['API_SERVER']}/unit'),
       headers: header,
       body: convert.jsonEncode(<String, String>{
-        'name': name,
-        'description': description,
+        'name': unit.name,
+        'abbreviation': unit.abbreviation,
       }),
     );
     if (response.statusCode == 201) {
       final Map<String, dynamic> body = convert.jsonDecode(response.body);
-      return "Room ${body['name']} added successfully";
+      return "Unit ${body['name']} added successfully";
     } else {
       final Map<String, dynamic> body = convert.jsonDecode(response.body);
       if (body.containsKey('message')) {
@@ -49,7 +50,7 @@ class RoomService {
           throw Exception(body['message']);
         }
       } else {
-        throw Exception('Failed to add room');
+        throw Exception('Failed to add unit');
       }
     }
   }

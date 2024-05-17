@@ -32,4 +32,9 @@ class Room {
       'devices': devices?.map((device) => device.toJson()).toList(),
     };
   }
+
+  @override
+  String toString() {
+    return 'Room{id: $id, name: $name, description: $description, devices: $devices}';
+  }
 }

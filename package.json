@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "diacritics": "^1.3.0"
-  },
-  "devDependencies": {
-    "@types/diacritics": "^1.3.3"
-  }
-}
