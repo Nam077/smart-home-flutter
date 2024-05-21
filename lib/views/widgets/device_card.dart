@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:smarthome/services/device_service.dart';
 
 import '../../models/device.dart';
 
@@ -12,33 +16,57 @@ class DeviceCard extends StatefulWidget {
 }
 
 class _DeviceCardState extends State<DeviceCard> {
-  bool _deviceStatus = false;
+  Device _device = Device.empty();
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _deviceStatus = widget.device.status; // Khởi tạo trạng thái ban đầu
+    _device = widget.device;
+    if (_device.isSensor) {
+      startTimer();
+    }
+  }
+
+  void startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      fetchData();
+    });
+  }
+
+  Future<void> fetchData() async {
+    final device = await DeviceService.getDeviceById(_device.id!);
+    if (mounted) {
+      setState(() {
+        _device = device;
+      });
+    }
   }
 
   void _handleSwitchChanged(bool newValue) {
-    if (widget.device.isSensor) {
+    if (_device.isSensor) {
       return;
     }
-    widget.onToggle(widget.device.id!, newValue).then((value) {
+    widget.onToggle(_device.id!, newValue).then((value) {
       if (value) {
         setState(() {
-          _deviceStatus = newValue;
+          _device.status = newValue;
         });
       }
     });
   }
 
   @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Thiết lập màu nền và màu chữ dựa trên trạng thái 3A81F7 và F5F5F5
     Color backgroundColor =
-        _deviceStatus ? const Color(0xFF3A81F7) : const Color(0xFFFFFFFF);
-    Color textColor = _deviceStatus ? Colors.white : const Color(0xFF65739E);
+        _device.status ? const Color(0xFF3A81F7) : const Color(0xFFFFFFFF);
+    Color textColor = _device.status ? Colors.white : const Color(0xFF65739E);
 
     return Container(
       padding: const EdgeInsets.all(13),
@@ -47,7 +75,7 @@ class _DeviceCardState extends State<DeviceCard> {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: _deviceStatus ? Colors.black12 : Colors.transparent,
+            color: _device.status ? Colors.black12 : Colors.transparent,
             blurRadius: 10,
           ),
         ],
@@ -62,14 +90,13 @@ class _DeviceCardState extends State<DeviceCard> {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      _handleSwitchChanged(!_deviceStatus);
+                      _handleSwitchChanged(!_device.status);
                     },
-                    child: Image.network(widget.device.image,
-                        width: 60, height: 60),
+                    child: Image.network(_device.image, width: 60, height: 60),
                   ),
-                  widget.device.isSensor
+                  _device.isSensor
                       ? Text(
-                          '${widget.device.value} ${widget.device.unit?.abbreviation ?? ''}',
+                          '${_device.value} ${_device.unit?.abbreviation ?? ''}',
                           style: TextStyle(
                             color: textColor,
                             fontSize: 12,
@@ -88,7 +115,7 @@ class _DeviceCardState extends State<DeviceCard> {
                                   20.0), // Bán kính viền để tạo hiệu ứng cong
                             ),
                             child: Switch(
-                              value: _deviceStatus,
+                              value: _device.status,
                               onChanged: _handleSwitchChanged,
                               activeColor: const Color(0xFFFFFFFF),
                               // Màu thumb khi không bật
@@ -99,7 +126,7 @@ class _DeviceCardState extends State<DeviceCard> {
               ),
               const SizedBox(height: 40),
               Divider(
-                color: _deviceStatus ? Colors.white : Colors.black12,
+                color: _device.status ? Colors.white : Colors.black12,
                 thickness: 0.6,
               ),
               Align(
@@ -108,7 +135,7 @@ class _DeviceCardState extends State<DeviceCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.device.name,
+                      _device.name,
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
@@ -116,7 +143,7 @@ class _DeviceCardState extends State<DeviceCard> {
                       ),
                     ),
                     Text(
-                      widget.device.room!.name,
+                      _device.room!.name,
                       style: TextStyle(
                         fontSize: 12,
                         color: textColor, // Áp dụng màu chữ ở đây

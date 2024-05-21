@@ -30,6 +30,20 @@ class Device {
     this.roomId,
   });
 
+  Device.empty()
+      : id = null,
+        name = '',
+        description = '',
+        status = false,
+        pinMode = '',
+        value = 0,
+        image = '',
+        room = null,
+        unit = null,
+        isSensor = false,
+        unitId = null,
+        roomId = null;
+
   factory Device.fromJson(Map<String, dynamic> json) {
     return Device(
       id: json['id'],

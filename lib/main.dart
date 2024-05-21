@@ -7,7 +7,6 @@ import 'package:smarthome/views/screens/home_page.dart';
 import 'package:smarthome/views/screens/add_device.dart';
 
 import 'views/screens/add_room.dart';
-import 'views/screens/test.dart';
 
 Future<void> main() async {
   await dotenv.load(fileName: ".env");

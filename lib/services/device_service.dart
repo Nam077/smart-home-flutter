@@ -55,6 +55,23 @@ class DeviceService {
     }
   }
 
+  static Future<Device> getDeviceById(int id) async {
+    final header = {
+      'Content-Type': 'application/json',
+      'Accept': '*/*',
+    };
+    final response = await http.get(
+      Uri.parse('${dotenv.env['API_SERVER']}/device/$id'),
+      headers: header,
+    );
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> device = convert.jsonDecode(response.body);
+      return Device.fromJson(device);
+    } else {
+      throw Exception('Failed to load device');
+    }
+  }
+
   static Future<String> addDevice(Device device) async {
     final header = {
       'Content-Type': 'application/json',
